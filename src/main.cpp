@@ -1,42 +1,80 @@
 #include <Arduino.h>
 
-/*
- * This ESP32 code is created by esp32io.com
- *
- * This ESP32 code is released in the public domain
- *
- * For more detail (instruction and wiring diagram), visit https://esp32io.com/tutorials/esp32-rgb-led
- */
+// RGB LED pins
+#define PIN_RED 23   // GIOP23
+#define PIN_GREEN 22 // GIOP22
+#define PIN_BLUE 21  // GIOP21
 
-#define PIN_RED    23 // GIOP23
-#define PIN_GREEN  22 // GIOP22
-#define PIN_BLUE   21 // GIOP21
+// Ultrasonic sensor pins
+const int trigPin = 5;
+const int echoPin = 18;
 
-void setup() {
-  pinMode(PIN_RED,   OUTPUT);
+// define sound speed in cm/uS
+#define SOUND_SPEED 0.034
+
+// ranges in cm for LED colours
+#define LONG_RANGE 200
+#define MEDIUM_RANGE 100
+#define SHORT_RANGE 45
+
+long duration;
+float distanceCm;
+
+void setup()
+{
+  Serial.begin(115200); // Starts the serial communication
+  delay(500);
+
+  pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
+  pinMode(echoPin, INPUT);  // Sets the echoPin as an Input
+
+  pinMode(PIN_RED, OUTPUT);
   pinMode(PIN_GREEN, OUTPUT);
-  pinMode(PIN_BLUE,  OUTPUT);
+  pinMode(PIN_BLUE, OUTPUT);
 }
 
-void loop() {
-  // color code #00C9CC (R = 0,   G = 201, B = 204)
-  analogWrite(PIN_RED,   0);
-  analogWrite(PIN_GREEN, 201);
-  analogWrite(PIN_BLUE,  204);
+void loop()
+{
+  // Clears the trigPin
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
 
-  delay(1000); // keep the color 1 second
+  // Sets the trigPin on HIGH state for 10 micro seconds
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
 
-  // color code #F7788A (R = 247, G = 120, B = 138)
-  analogWrite(PIN_RED,   247);
-  analogWrite(PIN_GREEN, 120);
-  analogWrite(PIN_BLUE,  138);
+  // Reads the echoPin, returns the sound wave travel time in microseconds
+  duration = pulseIn(echoPin, HIGH);
 
-  delay(1000); // keep the color 1 second
+  // Calculate the distance
+  distanceCm = duration * SOUND_SPEED / 2;
 
-  // color code #34A853 (R = 52,  G = 168, B = 83)
-  analogWrite(PIN_RED,   52);
-  analogWrite(PIN_GREEN, 168);
-  analogWrite(PIN_BLUE,  83);
+  // Prints the distance in the Serial Monitor
+  Serial.print("Distance (cm): ");
+  Serial.println(distanceCm);
 
-  delay(1000); // keep the color 1 second
+  if (distanceCm > LONG_RANGE)
+  {
+    // green
+    analogWrite(PIN_RED, 0);
+    analogWrite(PIN_GREEN, 255);
+    analogWrite(PIN_BLUE, 0);
+  }
+  else if (distanceCm > MEDIUM_RANGE)
+  {
+    // blue
+    analogWrite(PIN_RED, 0);
+    analogWrite(PIN_GREEN, 0);
+    analogWrite(PIN_BLUE, 255);
+  }
+  else if (distanceCm > SHORT_RANGE)
+  {
+    // red
+    analogWrite(PIN_RED, 255);
+    analogWrite(PIN_GREEN, 0);
+    analogWrite(PIN_BLUE, 0);
+  }
+
+  delay(250);
 }

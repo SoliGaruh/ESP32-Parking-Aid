@@ -12,11 +12,33 @@ const int echoPin = 18;
 // define sound speed in cm/uS
 #define SOUND_SPEED 0.034
 
-// ranges in cm for LED colours
-#define LONG_RANGE 200
-#define MEDIUM_RANGE 100
-#define SHORT_RANGE 45
+// distances in cm for LED colours
+#define WARN_DIST 200
+#define STOP_DIST 50
 
+#define PARKED_LED_ONTIME_MS 60000 // 60 seconds
+
+// enum representing where the car is
+enum carLocation_enum : char
+{
+  unknown = 0,
+  longRange,
+  mediumRange,
+  shortRange
+};
+
+// car location is initialsed to unknown to ensure the system lights up an LED on startup
+carLocation_enum carLocation = unknown;
+
+// time (millis()) when the car enters short range
+unsigned long shortRangeStartTime;
+
+// used to know whether the LED has been switched off due to the car being in short range for LED_PARKED_ONTIME_MS ms.
+// Assumed parked.
+// Yes I could try and work out if it has stopped based on distance measurements but it's not necessary.
+bool ledTimedOut = false;
+
+// used for distance sensor calculations
 long duration;
 float distanceCm;
 
@@ -51,30 +73,65 @@ void loop()
   distanceCm = duration * SOUND_SPEED / 2;
 
   // Prints the distance in the Serial Monitor
-  Serial.print("Distance (cm): ");
-  Serial.println(distanceCm);
+  //  Serial.print("Distance (cm): ");
+  // Serial.println(distanceCm);
 
-  if (distanceCm > LONG_RANGE)
+  if (distanceCm > WARN_DIST)
   {
-    // green
-    analogWrite(PIN_RED, 0);
-    analogWrite(PIN_GREEN, 255);
-    analogWrite(PIN_BLUE, 0);
-  }
-  else if (distanceCm > MEDIUM_RANGE)
-  {
-    // blue
-    analogWrite(PIN_RED, 0);
-    analogWrite(PIN_GREEN, 0);
-    analogWrite(PIN_BLUE, 255);
-  }
-  else if (distanceCm > SHORT_RANGE)
-  {
-    // red
-    analogWrite(PIN_RED, 255);
-    analogWrite(PIN_GREEN, 0);
-    analogWrite(PIN_BLUE, 0);
-  }
+    // the point here and below is not to write to the LED pins if the right colour is already set.
+    if (carLocation != longRange)
+    {
+      analogWrite(PIN_RED, 0);
+      analogWrite(PIN_GREEN, 255);
+      analogWrite(PIN_BLUE, 0);
 
-  delay(250);
+      carLocation = longRange;
+      Serial.println("LONG");
+    }
+  }
+  else if (distanceCm > STOP_DIST)
+  {
+    if (carLocation != mediumRange)
+    {
+      analogWrite(PIN_RED, 0);
+      analogWrite(PIN_GREEN, 0);
+      analogWrite(PIN_BLUE, 255);
+
+      Serial.println("MEDIUM");
+
+      carLocation = mediumRange;
+    }
+  }
+  else if (distanceCm <= STOP_DIST)
+  {
+    if (carLocation != shortRange)
+    {
+      // record the current time to determine when to turn off the red LED
+      shortRangeStartTime = millis();
+      ledTimedOut = false;
+
+      analogWrite(PIN_RED, 255);
+      analogWrite(PIN_GREEN, 0);
+      analogWrite(PIN_BLUE, 0);
+
+      Serial.println("SHORT");
+
+      carLocation = shortRange;
+    }
+
+    // turn off the red LED if it has been on for LED_PARKED_ONTIME_MS milliseconds
+    if (millis() - shortRangeStartTime > PARKED_LED_ONTIME_MS)
+    {
+      // switch off the LED if it hasn't already been switched off
+      if (!ledTimedOut)
+      {
+        Serial.println("TIMEOUT : LED off");
+        analogWrite(PIN_RED, 0);
+        analogWrite(PIN_GREEN, 0);
+        analogWrite(PIN_BLUE, 0);
+
+        ledTimedOut = true;
+      }
+    }
+  }
 }

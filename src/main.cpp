@@ -6,17 +6,17 @@
 #define PIN_BLUE 21  // GIOP21
 
 // Ultrasonic sensor pins
-const int trigPin = 5;
-const int echoPin = 18;
+#define PIN_TRIGGER 5
+#define PIN_ECHO 18
 
 // define sound speed in cm/uS
-#define SOUND_SPEED 0.034
+#define SOUND_SPEED 0.0343
 
 // distances in cm for LED colours
 #define WARN_DIST 200
-#define STOP_DIST 50
+#define STOP_DIST 65
 
-#define PARKED_LED_ONTIME_MS 60000 // 60 seconds
+#define PARKED_LED_ONTIME_MS 30000 // 30 seconds
 
 // enum representing where the car is
 enum carLocation_enum : char
@@ -47,8 +47,8 @@ void setup()
   Serial.begin(115200); // Starts the serial communication
   delay(500);
 
-  pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
-  pinMode(echoPin, INPUT);  // Sets the echoPin as an Input
+  pinMode(PIN_TRIGGER, OUTPUT); // Sets the trigPin as an Output
+  pinMode(PIN_ECHO, INPUT);     // Sets the echoPin as an Input
 
   pinMode(PIN_RED, OUTPUT);
   pinMode(PIN_GREEN, OUTPUT);
@@ -58,23 +58,23 @@ void setup()
 void loop()
 {
   // Clears the trigPin
-  digitalWrite(trigPin, LOW);
+  digitalWrite(PIN_TRIGGER, LOW);
   delayMicroseconds(2);
 
   // Sets the trigPin on HIGH state for 10 micro seconds
-  digitalWrite(trigPin, HIGH);
+  digitalWrite(PIN_TRIGGER, HIGH);
   delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
+  digitalWrite(PIN_TRIGGER, LOW);
 
   // Reads the echoPin, returns the sound wave travel time in microseconds
-  duration = pulseIn(echoPin, HIGH);
+  duration = pulseIn(PIN_ECHO, HIGH);
 
   // Calculate the distance
   distanceCm = duration * SOUND_SPEED / 2;
 
   // Prints the distance in the Serial Monitor
-  //  Serial.print("Distance (cm): ");
-  // Serial.println(distanceCm);
+  Serial.print("Distance (cm): ");
+  Serial.println(distanceCm);
 
   if (distanceCm > WARN_DIST)
   {
@@ -134,4 +134,6 @@ void loop()
       }
     }
   }
+
+  delay(200);
 }

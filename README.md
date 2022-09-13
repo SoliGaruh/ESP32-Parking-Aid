@@ -1,10 +1,5 @@
 # ESP32-Parking-Aid
 
-ESP32 Parking Aid copyright by Steve Tattersall. It has been developed using Microsoft VS Code and PlatformIO extension.
-This code is placed in the public domain and may be used freely as long as the author is credited.
-
-# Description
-
 Illuminates an RGB LED based on the distance an object is away from the HC-SR04 ultrasonic
 sensor. It was developed to assist parking a car in a garage.
 

@@ -1,25 +1,26 @@
 /*
-ESP32 Parking Aid copyright by Steve Tattersall. It has been developed using Microsoft VS Code and PlatformIO extension.
-This code is placed in the public domain and may be used freely as long as the author is credited.
+ Copyright (C) 2022 Steve Tattersall
 
-Description
------------
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
 
-Illuminates an RGB LED based on the distance an object is away from the HC-SR04 ultrasonic
-sensor. It was developed to assist parking a car in a garage.
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
 
-The RGB LED's red, green and blue pins are connected to PIN_RED, PIN_GREEN and PIN_BLUE.
-A 220 ohm resitor is connected inline between each of the LED colour pins and the corresponding ESP32
-GPIO ports. The LED's GND is connected to GND on the ESP32.
-
-The wiring for the HC-SR04 is shown in the file "ESP32 HC-SR04 Wiring.png". The HC-SR04 is used
-as it supports the 3.3V logic of the ESP32.
-
-The system is connected to mains power so there has been no consideration to power this from a
-battery.
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
 */
 
-#include <Arduino.h>
+#include <Arduino.h> // required for MS VS Code and PlatformIO IDE
 
 // RGB LED pins
 #define PIN_RED 23   // GIOP23

@@ -77,10 +77,14 @@ void setup()
   pinMode(PIN_RED, OUTPUT);
   pinMode(PIN_GREEN, OUTPUT);
   pinMode(PIN_BLUE, OUTPUT);
+
+  // todo: setup pot pins
 }
 
 void loop()
 {
+  // todo: add code to read pot to determine stop distance delta
+
   // Clears the trigPin
   digitalWrite(PIN_TRIGGER, LOW);
   delayMicroseconds(2);

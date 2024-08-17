@@ -22,6 +22,12 @@
 
 #include <Arduino.h> // required for MS VS Code and PlatformIO IDE
 
+// The resolution in bits to use for the analogRead() function
+#define ANALOG_READ_RESOLUTION 12
+
+// the pin the trimport is connected to
+#define PIN_POT 2
+
 // RGB LED pins
 #define PIN_RED 23   // GIOP23
 #define PIN_GREEN 22 // GIOP22
@@ -31,12 +37,17 @@
 #define PIN_TRIGGER 5
 #define PIN_ECHO 18
 
-// define sound speed in cm per microsecond
+// The speed of sound in cm per microsecond
 #define SOUND_SPEED 0.0343
 
-// distances in cm used to set the colour of the LED
+// Threshold distances in cm used to set the colour of the LED
 #define WARN_DIST 200
 #define STOP_DIST 65
+
+// Maximum distance in cm that the trimpot can adjust the threshold distances towards the garage door. 
+// The minimum value is always zero. On the ESP32, the trimpot mapping used is 
+// map(...,0,4095,0,MAX_DISTANCE_OFFSET).
+#define MAX_DISTANCE_OFFSET 30
 
 // This is how long the LED will stay lit once the car is parked.
 #define PARKED_LED_ONTIME_MS 30000 // 30 seconds
@@ -65,25 +76,44 @@ bool ledTimedOut = false;
 long duration;
 float distanceCm;
 
+// trimpot mapped offset value
+long mappedOffsetValue;
+
+// Maximum trimpot value
+const long MaxTrimPotValue = (1 << ANALOG_READ_RESOLUTION) - 1;
+
 // Initialise the Serial monitor and the GPIO pins
 void setup()
 {
   Serial.begin(115200); // Starts the serial communication
   delay(500);
 
-  pinMode(PIN_TRIGGER, OUTPUT); // Sets the trigPin as an Output
-  pinMode(PIN_ECHO, INPUT);     // Sets the echoPin as an Input
+  // Ultrasonic sensor pins
+  pinMode(PIN_TRIGGER, OUTPUT);
+  pinMode(PIN_ECHO, INPUT);
 
+  // LED pins
   pinMode(PIN_RED, OUTPUT);
   pinMode(PIN_GREEN, OUTPUT);
   pinMode(PIN_BLUE, OUTPUT);
 
-  // todo: setup pot pins
+  // Trimpot pin
+  pinMode(PIN_POT, INPUT);
+
+  // Set the analog read resolution in bits. I'm trying to ensure that it is always the same for all
+  // boards, to ensure the map() function used below works properly.
+  analogReadResolution(ANALOG_READ_RESOLUTION);
 }
 
 void loop()
 {
-  // todo: add code to read pot to determine stop distance delta
+  // The mapped offset is added to both the warning and stopping distance when determining the position of 
+  // the car and the colour of the LED.
+  mappedOffsetValue = map(analogRead(PIN_POT), 0, MaxTrimPotValue, 0, MAX_DISTANCE_OFFSET);
+
+  // Prints the distance offset to the Serial Monitor
+  Serial.print("Distance Offset (cm) [0 - 30] : ");
+  Serial.println(mappedOffsetValue);
 
   // Clears the trigPin
   digitalWrite(PIN_TRIGGER, LOW);
@@ -100,11 +130,13 @@ void loop()
   // Calculate the distance
   distanceCm = duration * SOUND_SPEED / 2;
 
-  // Prints the distance in the Serial Monitor
+  // Prints the car's distance to the Serial Monitor
   Serial.print("Distance (cm): ");
   Serial.println(distanceCm);
 
-  if (distanceCm > WARN_DIST)
+  //! IMPORTANT: Never subtract the trimpot's mapped offset value from the threshold distance. Subtraction could
+  //! result in the calculated threshold distance being too close to the sensor resulting in an accident.
+  if (distanceCm > WARN_DIST + mappedOffsetValue)
   {
     // the point here and below is not to write to the LED pins if the right colour is already set.
     if (carLocation != longRange)
@@ -117,7 +149,10 @@ void loop()
       Serial.println("LONG");
     }
   }
-  else if (distanceCm > STOP_DIST)
+
+  //! IMPORTANT: Never subtract the trimpot's mapped offset value from the threshold distance. Subtraction could
+  //! result in the calculated threshold distance being too close to the sensor resulting in an accident.
+  else if (distanceCm > (STOP_DIST + mappedOffsetValue))
   {
     if (carLocation != mediumRange)
     {
@@ -130,7 +165,10 @@ void loop()
       carLocation = mediumRange;
     }
   }
-  else if (distanceCm <= STOP_DIST)
+
+  //! IMPORTANT: Never subtract the trimpot's mapped offset value from the threshold distance. Subtraction could
+  //! result in the calculated threshold distance being too close to the sensor resulting in an accident.
+  else if (distanceCm <= (STOP_DIST + mappedOffsetValue))
   {
     if (carLocation != shortRange)
     {

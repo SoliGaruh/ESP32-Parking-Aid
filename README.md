@@ -1,11 +1,11 @@
 # ESP32-Parking-Aid
 
-Illuminates an RGB LED based on the distance an object is away from the HC-SR04 ultrasonic
+Illuminates green, yellow and red LEDs based on the distance an object is away from the HC-SR04 ultrasonic
 sensor. It was developed to assist parking a car in a garage.
 
-The RGB LED's red, green and blue pins are connected to PIN_RED, PIN_GREEN and PIN_BLUE.
+The LED's red, green and yellow pins are connected to PIN_RED, PIN_GREEN and PIN_YELLOW.
 
-A 220 ohm resitor is connected inline between each of the LED colour pins and the corresponding ESP32
+A 100 Ohm resitor is connected inline between each of the LED colour pins and the corresponding ESP32
 GPIO ports. The LED's GND is connected to GND on the ESP32.
 
 The wiring for the HC-SR04 is shown in the file "ESP32 HC-SR04 Wiring.png". The HC-SR04 is used

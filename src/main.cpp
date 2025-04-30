@@ -28,10 +28,10 @@
 // the pin the trimport is connected to
 #define PIN_POT 2
 
-// RGB LED pins
+// traffic light LED pins
 #define PIN_RED 23   // GIOP23
 #define PIN_GREEN 22 // GIOP22
-#define PIN_BLUE 21  // GIOP21
+#define PIN_YELLOW 21  // GIOP21
 
 // Ultrasonic sensor pins
 #define PIN_TRIGGER 5
@@ -41,8 +41,8 @@
 #define SOUND_SPEED 0.0343
 
 // Threshold distances in cm used to set the colour of the LED
-#define WARN_DIST 200
-#define STOP_DIST 65
+#define WARN_DIST 100
+#define STOP_DIST 22
 
 // Maximum distance in cm that the trimpot can adjust the threshold distances towards the garage door. 
 // The minimum value is always zero. On the ESP32, the trimpot mapping used is 
@@ -95,7 +95,7 @@ void setup()
   // LED pins
   pinMode(PIN_RED, OUTPUT);
   pinMode(PIN_GREEN, OUTPUT);
-  pinMode(PIN_BLUE, OUTPUT);
+  pinMode(PIN_YELLOW, OUTPUT);
 
   // Trimpot pin
   pinMode(PIN_POT, INPUT);
@@ -103,6 +103,17 @@ void setup()
   // Set the analog read resolution in bits. I'm trying to ensure that it is always the same for all
   // boards, to ensure the map() function used below works properly.
   analogReadResolution(ANALOG_READ_RESOLUTION);
+
+  // self test of the LEDs
+  digitalWrite(PIN_RED, HIGH);
+  digitalWrite(PIN_GREEN, HIGH);
+  digitalWrite(PIN_YELLOW, HIGH);
+
+  delay(5000);
+
+  digitalWrite(PIN_RED, LOW);
+  digitalWrite(PIN_GREEN, LOW);
+  digitalWrite(PIN_YELLOW, LOW);
 }
 
 void loop()
@@ -141,9 +152,9 @@ void loop()
     // the point here and below is not to write to the LED pins if the right colour is already set.
     if (carLocation != longRange)
     {
-      analogWrite(PIN_RED, 0);
-      analogWrite(PIN_GREEN, 255);
-      analogWrite(PIN_BLUE, 0);
+      digitalWrite(PIN_RED, LOW);
+      digitalWrite(PIN_GREEN, HIGH);
+      digitalWrite(PIN_YELLOW, LOW);
 
       carLocation = longRange;
       Serial.println("LONG");
@@ -156,9 +167,9 @@ void loop()
   {
     if (carLocation != mediumRange)
     {
-      analogWrite(PIN_RED, 0);
-      analogWrite(PIN_GREEN, 0);
-      analogWrite(PIN_BLUE, 255);
+      digitalWrite(PIN_RED, LOW);
+      digitalWrite(PIN_GREEN, LOW);
+      digitalWrite(PIN_YELLOW, HIGH);
 
       Serial.println("MEDIUM");
 
@@ -176,9 +187,9 @@ void loop()
       shortRangeStartTime = millis();
       ledTimedOut = false;
 
-      analogWrite(PIN_RED, 255);
-      analogWrite(PIN_GREEN, 0);
-      analogWrite(PIN_BLUE, 0);
+      digitalWrite(PIN_RED, HIGH);
+      digitalWrite(PIN_GREEN, LOW);
+      digitalWrite(PIN_YELLOW, LOW);
 
       Serial.println("SHORT");
 
@@ -192,9 +203,9 @@ void loop()
       if (!ledTimedOut)
       {
         Serial.println("TIMEOUT : LED off");
-        analogWrite(PIN_RED, 0);
-        analogWrite(PIN_GREEN, 0);
-        analogWrite(PIN_BLUE, 0);
+        digitalWrite(PIN_RED, LOW);
+        digitalWrite(PIN_GREEN, LOW);
+        digitalWrite(PIN_YELLOW, LOW);
 
         ledTimedOut = true;
       }

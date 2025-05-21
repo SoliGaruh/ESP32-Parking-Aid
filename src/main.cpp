@@ -41,8 +41,8 @@
 #define SOUND_SPEED 0.0343
 
 // Threshold distances in cm used to set the colour of the LED
-#define WARN_DIST 100
-#define STOP_DIST 22
+#define WARN_DIST 120
+#define STOP_DIST 75
 
 // Maximum distance in cm that the trimpot can adjust the threshold distances towards the garage door. 
 // The minimum value is always zero. On the ESP32, the trimpot mapping used is 
@@ -147,7 +147,7 @@ void loop()
 
   //! IMPORTANT: Never subtract the trimpot's mapped offset value from the threshold distance. Subtraction could
   //! result in the calculated threshold distance being too close to the sensor resulting in an accident.
-  if (distanceCm > WARN_DIST + mappedOffsetValue)
+  if (distanceCm > (WARN_DIST + mappedOffsetValue))
   {
     // the point here and below is not to write to the LED pins if the right colour is already set.
     if (carLocation != longRange)
